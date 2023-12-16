@@ -6,3 +6,5 @@ pnpm-lock.yaml
 package-lock.json
 certificates
 test.html
+deploy.sh
+server.sh
