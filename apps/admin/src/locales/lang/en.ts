@@ -1,6 +1,6 @@
 const locale: I18nType.Schema = {
   system: {
-    title: 'ShortTV Admin'
+    title: 'Fast Short Admin'
   },
   common: {
     add: 'Add',
