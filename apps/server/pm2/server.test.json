@@ -1,0 +1,27 @@
+{
+  "apps": [
+    {
+      "name": "sctest",
+      "script": "./bin/www",
+      "log_date_format": "YYYY-MM-DD HH:mm:ss",
+      "exec_mode": "cluster",
+      "instances": 2,
+      "wait_ready": true,
+      "restart_delay": 10000,
+      "listen-timeout": 10000,
+      "merge_logs": true,
+      "env": {
+        "PLATFORM": "TEST"
+      }
+    },
+    {
+      "name": "works-airDrop",
+      "script": "./works/airDrop.js",
+      "error_file": "log/works-airDrop.log",
+      "out_file": "log/works-airDrop.log",
+      "env": {
+        "PLATFORM": "TEST"
+      }
+    }
+  ]
+}

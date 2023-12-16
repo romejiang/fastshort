@@ -1,0 +1,19 @@
+{
+  "apps": [
+    {
+      "name": "ShortTV",
+      "script": "./app.js",
+      "log_date_format": "YYYY-MM-DD HH:mm:ss",
+      "exec_mode": "cluster",
+      "instances": 2,
+      "wait_ready": true,
+      "restart_delay": 10000,
+      "listen-timeout": 10000,
+      "merge_logs": true,
+      "env": {
+        "PLATFORM": "PROD",
+        "NODE_OPTIONS": "--openssl-legacy-provider"
+      }
+    }
+  ]
+}

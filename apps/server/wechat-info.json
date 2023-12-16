@@ -1,0 +1,17 @@
+{
+  "wechatConfig": {
+    "store": "FileStore_/Users/stephen/Projects/Xian/tiktokapp/server/wechat-info.json"
+  },
+  "globalToken": {
+    "count": 0
+  },
+  "urls": {},
+  "oauth": {},
+  "card": {},
+  "mp": {
+    "oMDKn5UC0-Jzh5qgnFElDT6MZptE": {
+      "session_key": "OuVocQMm4VYH6LcU7j9cIw==",
+      "openid": "oMDKn5UC0-Jzh5qgnFElDT6MZptE"
+    }
+  }
+}

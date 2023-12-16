@@ -1,0 +1,62 @@
+{
+  "name": "gen",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#@/*.js": "./*.js"
+  },
+  "scripts": {
+    "start": "node --watch --trace-warnings app",
+    "dev": "node --watch --trace-warnings app",
+    "test": "pm2 start pm2/server.test.json",
+    "prod": "pm2 start pm2/server.prod.json",
+    "//": "update 可以检查依赖包更新",
+    "update": "npx npm-check-updates",
+    "create": "plop --plopfile template/plopfile.js"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "test/*",
+      "works/*",
+      "package.json"
+    ]
+  },
+  "dependencies": {
+    "@koa-better-modules/joi-router": "^11.0.0",
+    "@koa/cors": "^4.0.0",
+    "ali-oss": "^6.17.1",
+    "aws-sdk": "^2.1511.0",
+    "bignumber.js": "^9.1.1",
+    "chalk": "^5.2.0",
+    "chinese-random-name": "^2.0.0",
+    "dayjs": "^1.11.10",
+    "ethers": "^6.0.8",
+    "fluent-ffmpeg": "^2.1.2",
+    "got": "12.5.3",
+    "ipdb": "^0.3.3",
+    "jsonwebtoken": "^9.0.0",
+    "koa": "^2.14.1",
+    "koa-body": "^6.0.1",
+    "koa-bodyparser": "^4.3.0",
+    "koa-joi-router": "^8.0.0",
+    "koa-json": "^2.0.2",
+    "koa-jwt": "^4.0.4",
+    "koa-logger": "^3.2.1",
+    "koa-onerror": "^4.2.0",
+    "koa-router": "^12.0.0",
+    "koa-unless": "^1.0.7",
+    "md5": "^2.3.0",
+    "mime-types": "^2.1.35",
+    "moment": "^2.29.4",
+    "mongodb": "^5.1.0",
+    "redis": "^4.6.5",
+    "uuid": "^9.0.1",
+    "wechat-jssdk": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20",
+    "plop": "^3.1.2",
+    "tough-cookie": "^4.1.2"
+  }
+}
