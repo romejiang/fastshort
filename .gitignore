@@ -4,3 +4,5 @@ screenshots
 pnpm-lock.json
 pnpm-lock.yaml
 package-lock.json
+certificates
+test.html

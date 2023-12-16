@@ -1,0 +1,149 @@
+{
+    "pages": [
+        {
+            "path": "pages/index/index",
+            "style": {
+                "app-plus": {
+                    "titleNView": false
+                }
+            }
+        },
+        // #ifdef APP
+        {
+            "path": "pages/player/app/short",
+            "style": {
+                "app-plus": {
+                    "titleNView": false,
+                    "bounce": "none"
+                }
+            }
+        },
+        {
+            "path": "pages/player/app/series",
+            "style": {
+                "app-plus": {
+                    "titleNView": false,
+                    "bounce": "none"
+                }
+            }
+        },
+        // #endif
+        // #ifdef WEB || MP-WEIXIN
+        {
+            "path": "pages/player/web/short",
+            "style": {
+                "app-plus": {
+                    "titleNView": false,
+                    "bounce": "none"
+                }
+            }
+        },
+        {
+            "path": "pages/player/web/series",
+            "style": {
+                "app-plus": {
+                    "titleNView": false,
+                    "bounce": "none"
+                }
+            }
+        },
+        // #endif
+        {
+            "path": "pages/profile/favorite",
+            "style": {
+                "app-plus": {
+                    "titleNView": false
+                }
+            }
+        },
+        {
+            "path": "pages/profile/profile",
+            "style": {
+                "app-plus": {
+                    "titleNView": false
+                }
+            }
+        },
+        {
+            "path": "pages/profile/topup",
+            "style": {
+                "app-plus": {
+                    "titleNView": false
+                }
+            }
+        },
+        {
+            "path": "pages/profile/wallet",
+            "style": {
+                "app-plus": {
+                    "titleNView": false
+                }
+            }
+        },
+        {
+            "path": "pages/profile/register",
+            "style": {
+                "app-plus": {
+                    "titleNView": false
+                }
+            }
+        },
+        {
+            "path": "pages/profile/login",
+            "style": {
+                "app-plus": {
+                    "titleNView": false
+                }
+            }
+        }
+    ],
+    "tabBar": {
+        "color": "#707070",
+        "selectedColor": "#FFFFFF",
+        "backgroundColor": "#181818",
+        "iconWidth": "20px",
+        "list": [
+            {
+                "pagePath": "pages/index/index",
+                "text": "%discover%",
+                "iconPath": "static/tabbar/a2.png",
+                "selectedIconPath": "static/tabbar/a.png"
+            },
+            // #ifdef APP
+            {
+                "pagePath": "pages/player/app/short",
+                "text": "%shorts%",
+                "iconPath": "static/tabbar/b2.png",
+                "selectedIconPath": "static/tabbar/b.png"
+            },
+            // #endif
+            // #ifdef WEB || MP-WEIXIN
+            {
+                "pagePath": "pages/player/web/short",
+                "text": "%shorts%",
+                "iconPath": "static/tabbar/b2.png",
+                "selectedIconPath": "static/tabbar/b.png"
+            },
+            // #endif
+            {
+                "pagePath": "pages/profile/favorite",
+                "text": "%favorite%",
+                "iconPath": "static/tabbar/c2.png",
+                "selectedIconPath": "static/tabbar/c.png"
+            },
+            {
+                "pagePath": "pages/profile/profile",
+                "text": "%profile%",
+                "iconPath": "static/tabbar/d2.png",
+                "selectedIconPath": "static/tabbar/d.png"
+            }
+        ]
+    },
+    "globalStyle": {
+        "navigationBarTextStyle": "black",
+        "navigationBarTitleText": "%app.name%",
+        "navigationBarBackgroundColor": "#181818",
+        "backgroundColor": "#181818",
+        "navigationStyle": "custom"
+    }
+}

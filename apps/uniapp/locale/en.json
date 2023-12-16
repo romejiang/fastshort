@@ -1,0 +1,29 @@
+{
+  "app.name": "ShortTV",
+  "discover": "Discover",
+  "shorts": "Shorts",
+  "favorite": "Favorite",
+  "favorite1": "My Favorites",
+  "favorite2": "Recently Watched",
+  "profile": "Profile",
+  "setting": "Setting",
+  "language": "Language",
+  "feedback": "Feedback",
+  "rewards": "Rewards",
+  "signin": "Sign In",
+  "logout": "Logout",
+  "index1": "Most Trending",
+  "index2": "New Drama Selection",
+  "index3": "Broken Love",
+  "index4": "Modern Romance",
+  "index5": "New Release",
+  "index6": "Most Trending",
+
+
+  "languagesetting": "Language Setting",
+  "english": "English",
+  "chinese": "简体中文",
+
+   
+  "last": "Crypto Text"
+}

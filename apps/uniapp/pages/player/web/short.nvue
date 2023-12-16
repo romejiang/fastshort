@@ -1,0 +1,354 @@
+<template>
+  <view>
+    <swiper
+      :style="styleWidthHeight"
+      :vertical="true"
+      @animationfinish="swiperAnimationFinish"
+      @change="swiperChange"
+      :current="swiperCurrent"
+      :indicator-dots="false"
+    >
+      <swiper-item v-for="(videoItem, index) in dataList" :key="index">
+        <view v-if="Math.abs(currentPlayer - index) <= 1">
+          <view>
+            <video
+              :id="videoItem._id"
+              :loop="false"
+              :muted="videoItem.state != 'play'"
+              :controls="false"
+              :http-cache="true"
+              :page-gesture="false"
+              :show-fullscreen-btn="false"
+              :show-loading="true"
+              :show-center-play-btn="false"
+              :enable-progress-gesture="false"
+              object-fit="cover"
+              :src="videoItem.video[0]"
+              @ended="playerEnded"
+              @click="playerClick(videoItem.state)"
+              @timeupdate="playerTimeUpdate($event, index)"
+              style="z-index: -1"
+              :style="styleWidthHeight"
+            ></video>
+            <!-- 这里是封面 TODO -->
+          </view>
+          <!-- 播放状态：pause 的时候就会暂停 -->
+          <view
+            class="videoHover"
+            @click="playerClick(videoItem.state)"
+            :style="styleWidthHeight"
+          >
+            <image
+              v-if="videoItem.state != 'play'"
+              class="playState"
+              src="@/static/img/index/play.png"
+            ></image>
+          </view>
+          <view class="userInfo">
+            <!-- 1.头像 -->
+            <avatar :avatar="videoItem.cover[0]" @click="clickAvatar(index)" />
+            <!-- 2.点赞 -->
+            <like
+              :isLike="videoItem.isLike"
+              :like="videoItem.like"
+              :series="videoItem.series"
+              @click="clickLike"
+            />
+            <!-- 3.评论 -->
+            <comment
+              :total="videoItem.comments"
+              :index="index"
+              @click="openComment"
+            />
+            <!-- 4.分享 -->
+            <share @click="clickShare" />
+          </view>
+          <!-- 最底下的文字部分 -->
+          <message
+            v-if="dataList.length !== 0"
+            :title="videoItem.title"
+            :msg="videoItem.description"
+          />
+          <!-- 进度条 -->
+          <progressbar
+            v-if="currentPlayer === index"
+            :timeDuration="timeduration"
+            :progressBarPercent="progressBarPercent"
+            @seek="progressBarSeek"
+          ></progressbar>
+        </view>
+      </swiper-item>
+    </swiper>
+
+    <uni-popup ref="pinglun">
+      <comments @closeComment="closeComment"></comments>
+    </uni-popup>
+  </view>
+</template>
+
+<script>
+import comments from '@/components/comment/index.vue'
+
+import likeEffect from '@/components/likeEffect.vue'
+import progressbar from '@/components/progressbar.vue'
+import like from '@/components/like.vue'
+import comment from '@/components/comment.vue'
+import share from '@/components/share.vue'
+import cover from '@/components/cover.vue'
+import message from '@/components/message.vue'
+import avatar from '@/components/avatar.vue'
+import request from '@/common/request'
+
+// #ifdef WEB
+const audioContext = uni.createInnerAudioContext()
+audioContext.loop = true
+// #endif
+
+export default {
+  components: {
+    comments,
+    progressbar,
+    likeEffect,
+    avatar,
+    like,
+    comment,
+    share,
+    cover,
+    message
+  },
+  data() {
+    return {
+      dataList: [],
+      videoContextList: {},
+      // 最关键的值，记录当前播放的视频id
+      currentPlayer: -1,
+      // 可以用来跳视频，跳集
+      swiperCurrent: 0,
+      isHumanClick: false,
+
+      videoID: '', // 评论的用的，可以删除
+
+      // -- 进度条相关 -- start
+      progressBarPercent: 0,
+      timeduration: 0
+      // -- 进度条相关 -- end
+    }
+  },
+  computed: {
+    styleWidthHeight() {
+      return `width: ${uni.getSystemInfoSync().windowWidth}px; height: ${
+        uni.getSystemInfoSync().windowHeight
+      }px;`
+    }
+  },
+  watch: {
+    async currentPlayer(val, oldVal) {
+      // 停止老的视频, 如果用户已经点击就播放，如果没有就等待
+      this.stopVideo(oldVal)
+      if (this.isHumanClick) {
+        this.playVideo(val)
+      } else {
+        this.pauseVideo(val)
+      }
+    }
+  },
+  onLoad(option) {
+    // #ifdef MP
+    this.isHumanClick = true
+    // #endif
+    this.loadData(option)
+  },
+  onShow() {
+    console.log('回到前台')
+    if (this.dataList.length > 0 && this.isHumanClick) {
+      this.playVideo(this.currentPlayer)
+    }
+  },
+  onHide() {
+    console.log('到后台')
+    if (this.dataList.length > 0 && this.isHumanClick) {
+      this.pauseVideo(this.currentPlayer)
+    }
+  },
+  methods: {
+    getVideoContext(index) {
+      if (this.videoContextList[index]) {
+        return this.videoContextList[index]
+      } else {
+        const videoContext = uni.createVideoContext(
+          this.dataList[index]._id,
+          this
+        )
+        this.videoContextList[index] = videoContext
+        return videoContext
+      }
+    },
+    // 播放当前视频，并预先加载一下一个视频
+    playVideo(index) {
+      if (index >= 0) {
+        this.dataList[index].state = 'play'
+        // #ifdef WEB
+        audioContext.src = this.dataList[index].video[0]
+        // #endif
+        console.log('play: index', index)
+        setTimeout(() => {
+          this.getVideoContext(index).play()
+          // #ifdef WEB
+          audioContext.play()
+          // #endif
+        }, 100)
+      }
+    },
+    // 停止播放视频
+    stopVideo(index) {
+      if (index >= 0) {
+        this.dataList[index].state = 'stop'
+        console.log('stop: index', index)
+        clearTimeout(this.pauseTimer)
+        this.pauseTimer = setTimeout(() => {
+          const videoContext = this.getVideoContext(index)
+          videoContext.pause()
+          videoContext.seek(0)
+          // #ifdef WEB
+          audioContext.pause()
+          audioContext.seek(0)
+          // #endif
+        }, 100)
+      }
+    },
+    pauseVideo(index) {
+      if (index >= 0) {
+        this.dataList[index].state = 'pause'
+        console.log('pause: index', index)
+        clearTimeout(this.pauseTimer)
+        this.pauseTimer = setTimeout(() => {
+          const videoContext = this.getVideoContext(index)
+          videoContext.pause()
+          // #ifdef WEB
+          audioContext.pause()
+          // #endif
+        }, 100)
+      }
+    },
+    //点击播放&&暂停
+    playerClick(state) {
+      console.log('click state: ', state)
+      if (this.currentPlayer < 0) {
+        return
+      }
+      this.isHumanClick = true
+      if (state == 'play') {
+        this.pauseVideo(this.currentPlayer)
+      } else {
+        this.playVideo(this.currentPlayer)
+      }
+    },
+
+    progressBarSeek(seek) {
+      if (this.isHumanClick) {
+        this.getVideoContext(this.currentPlayer).seek(seek)
+        this.getVideoContext(this.currentPlayer).play()
+        // #ifdef WEB
+        audioContext.seek(seek)
+        audioContext.play()
+        // #endif
+        this.dataList[this.currentPlayer].state = 'play'
+      }
+    },
+    playerTimeUpdate(event, index) {
+      // 触发进度条更新
+      if (index === this.currentPlayer) {
+        this.timeduration = event.detail.duration
+        this.progressBarPercent =
+          event.detail.currentTime / event.detail.duration
+      }
+    },
+    swiperChange(event) {
+      this.currentPlayer = event.detail.current
+    },
+    swiperAnimationFinish(event) {
+      // 1.这里进行判断，如果是最后一个视频就进入 loadData() 方法加载视频进入列表
+      if (this.currentPlayer == this.dataList.length - 1) {
+        this.loadNextData()
+      }
+    },
+
+    playerEnded() {
+      console.log('playerEnded')
+      // 1.播放当前视频结束时触发，自动切换下一个视频
+      this.swiperCurrent = this.currentPlayer + 1
+    },
+
+    //每一组结束时新的请求
+    loadNextData() {
+      // uni.request({
+      //   url: 'https://bdb24c6d-8c19-4f80-8e7e-c9c9f037f131.bspapp.com/video',
+      //   method: 'POST',
+      //   data: {
+      //     info: 'get_video'
+      //   },
+      //   success: (res) => {
+      //     var msg = res.data.data
+      //     // 2.这里把视频添加到视频列表
+      //     for (let i = 0; i < msg.length; i++) {
+      //       this.dataList.push(msg[i])
+      //     }
+      //   }
+      // })
+    },
+    async loadData() {
+      const data = await request.post('/public/short')
+
+      this.dataList = data
+      // 3.播放当前视频
+      this.currentPlayer = 0
+
+      this.videoID = this.dataList[this.currentPlayer]._id
+    },
+    clickShare() {
+      uni.showToast({
+        title: '分享',
+        icon: 'none'
+      })
+    },
+    clickAvatar(i) {},
+    openComment(index) {
+      uni.setStorageSync('videoID', this.dataList[index]._id)
+      this.videoID = this.dataList[index]._id
+      this.$refs.pinglun.open('bottom')
+    },
+    closeComment() {
+      // 点击评论里面的叉叉，就会关闭评论
+      this.$refs.pinglun.close()
+    },
+    clickLike(like) {
+      this.dataList[this.currentPlayer].isLike =
+        !this.dataList[this.currentPlayer].isLike
+      const video = this.dataList[this.currentPlayer]
+      like ? (video.like > 0 ? video.like-- : (video.like = 0)) : video.like++
+    }
+  }
+}
+</script>
+
+<style>
+.videoHover {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.1);
+  top: 0;
+  left: 0;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+}
+.playState {
+  width: 160rpx;
+  height: 160rpx;
+  opacity: 0.2;
+}
+.userInfo {
+  position: absolute;
+  bottom: 110px;
+  right: 10px;
+}
+</style>

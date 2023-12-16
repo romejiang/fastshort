@@ -1,0 +1,29 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/bower_components": true,
+    "**/node_modules": true,
+    "**/tmp": true,
+    "**/.classpath": true,
+    "**/.project": true,
+    "**/.settings": true,
+    "**/.factorypath": true,
+    "package-lock.json": true,
+    "unpackage": true,
+    "uni_modules": true,
+    "androidPrivacy.json": true,
+    ".gitignore": true
+  },
+  "hide-files.files": [
+    "package-lock.json",
+    "unpackage",
+    "uni_modules",
+    "androidPrivacy.json",
+    ".gitignore"
+  ]
+}

@@ -1,0 +1,498 @@
+<template>
+  <view class="container">
+    <!-- #ifdef APP -->
+    <!-- 点赞特效层 -->
+    <likeEffect
+      v-if="isLikePlay"
+      v-model="isLikePlay"
+      :position="likePosition"
+    />
+    <!-- 最外层的view，控制整个的高度，以及宽度 -->
+    <view :style="styleWidthHeight">
+      <list
+        @loadmore="listLoadMore"
+        :loadmoreoffset="windowHeight * 3"
+        @scroll="listScroll"
+        :show-scrollbar="false"
+        :pagingEnabled="true"
+        :scrollable="true"
+      >
+        <!-- 刷新模块 -->
+        <refresh
+          class="refresh"
+          @refresh="onRefresh"
+          @pullingdown="onPullingDown"
+          :display="refreshing ? 'show' : 'hide'"
+        >
+          <loading style="background-color: #ffffff">
+            <image
+              src="@/static/img/index/logins.gif"
+              :style="
+                'width: 80upx; height: 40upx; margin-top: 80upx; margin-bottom: 30upx; margin-left: ' +
+                (windowWidth - 200) +
+                'px;'
+              "
+            ></image>
+          </loading>
+        </refresh>
+
+        <!-- 循环数据 -->
+        <cell v-for="(videoItem, i) in dataList" :key="i">
+          <!-- 用div把视频模组套起来 -->
+          <div :style="styleWidthHeight" :ref="i">
+            <view v-if="currentPlayer - i <= 1">
+              <view class="root">
+                <video
+                  :id="videoItem._id"
+                  :loop="true"
+                  :src="videoItem.video[0]"
+                  :muted="videoItem.state != 'play'"
+                  @play="videoPlay(i)"
+                  :enable-progress-gesture="false"
+                  :page-gesture="false"
+                  :controls="false"
+                  :http-cache="true"
+                  :show-loading="false"
+                  :show-fullscreen-btn="false"
+                  :show-center-play-btn="false"
+                  :style="styleWidthHeight"
+                  object-fit="cover"
+                  @timeupdate="videoTimeUpdate($event, i)"
+                ></video>
+                <!-- 这里是封面 -->
+                <!-- <image
+                  v-if="!videoItem.playIng"
+                  :src="videoItem.cover[0]"
+                  mode="cover"
+                  style="position: absolute;"
+                  :style="styleWidthHeight"
+                ></image> -->
+              </view>
+              <!-- 这个是暂停时出现的图标 -->
+              <view
+                class="videoHover"
+                @touchstart="playerClick(videoItem.state, $event)"
+                :style="styleWidthHeight"
+              >
+                <image
+                  v-if="videoItem.state != 'play'"
+                  class="playState"
+                  src="@/static/img/index/play.png"
+                ></image>
+              </view>
+              <view class="userInfo">
+                <!-- 1.头像 -->
+                <avatar :avatar="videoItem.cover[0]" @click="clickAvatar(i)" />
+                <!-- 2.点赞 -->
+                <like
+                  :like="videoItem.like"
+                  :isLike="videoItem.isLike"
+                  :series="videoItem.series"
+                  @click="clickLike"
+                />
+                <!-- 3.评论 -->
+                <comment
+                  :total="videoItem.comments"
+                  :index="i"
+                  @click="openComment"
+                />
+                <!-- 4.分享 -->
+                <share @click="clickShare" />
+                <!-- 5.转轮 -->
+              </view>
+              <!-- 最底下的文字部分 -->
+              <message
+                v-if="dataList.length !== 0"
+                :title="videoItem.title"
+                :msg="videoItem.description"
+                :test="currentPlayer + 1"
+              />
+            </view>
+          </div>
+        </cell>
+      </list>
+      <!-- 进度条 -->
+      <progressbar
+        :totalTime="totalTime"
+        :currentTime="currentTime"
+        @seek="progressBarSeek"
+      ></progressbar>
+    </view>
+    <!--
+		引入评论
+		-->
+    <uni-popup ref="pinglun">
+      <comments @closeComment="closeComment"></comments>
+    </uni-popup>
+    <!-- #endif -->
+  </view>
+</template>
+<script>
+import comments from '@/components/comment/index.vue'
+import progressbar from '@/pages/player/app/progressbar.vue'
+import likeEffect from '@/components/likeEffect.vue'
+import like from '@/components/like.vue'
+import comment from '@/components/comment.vue'
+import share from '@/components/share.vue'
+import cover from '@/components/cover.vue'
+import message from '@/components/message.vue'
+import avatar from '@/components/avatar.vue'
+import request from '@/common/request'
+
+export default {
+  components: {
+    comments,
+    progressbar,
+    likeEffect,
+    avatar,
+    like,
+    comment,
+    share,
+    cover,
+    message
+  },
+  data() {
+    return {
+      dataList: [], //用于数据循环的列表🌟💗
+      // 所有播放器的具柄，方便调用
+      videoContextList: {},
+      currentPlayer: -1, //当前播放的视频index，默认为0🌟💗
+
+      refreshing: true, //用于下拉刷新🌟💗
+
+      windowWidth: 0, //获取屏幕宽度🌟💗
+      windowHeight: 0,
+      tabberHeight: 0, //测试高度🌟💗
+
+      platform: '', //用于获取操作系统：ios、android🌟💗
+      isSwiperDragging: false, //false代表停止滑动🌟💗
+
+      totalTime: 0,
+      currentTime: 0,
+
+      isAutoplay: false, //是否开启自动播放(默认不开启)
+
+      // 评论浮层的高度
+      commentHeight: 1.18,
+      // 双击点赞参数
+      numberOfClicks: 0,
+      dblClickTimer: null,
+      // 显示点赞特效和位置
+      isLikePlay: false,
+      likePosition: {},
+
+      // 临时变量，用于定时器
+      pauseTimer: null,
+      preloadTimer: null,
+      timers: ''
+    }
+  },
+
+  watch: {
+    currentPlayer(val, oldVal) {
+      console.log('watch currentPlayer: ', val)
+      // 停止老的视频
+      if (val >= 0) {
+        this.stopVideo(oldVal)
+        // 播放当前视频，并预先加载下一个视频
+        this.playVideo(val)
+      }
+    }
+  },
+  computed: {
+    styleWidthHeight() {
+      return `width: ${this.windowWidth}px; height: ${
+        this.windowHeight - this.tabberHeight
+      }px;`
+    },
+    ready: function () {
+      return this.dataList.length > 0 && this.currentPlayer >= 0
+    }
+  },
+  onShow() {
+    console.log('回到前台')
+    if (this.ready) {
+      this.dataList[this.currentPlayer].state = 'play'
+      this.getVideoContext(this.currentPlayer).play()
+    }
+  },
+  onHide() {
+    console.log('到后台')
+    if (this.ready) {
+      this.dataList[this.currentPlayer].state = 'pause'
+      this.getVideoContext(this.currentPlayer).pause()
+    }
+  },
+  async onLoad(option) {
+    this.windowWidth = uni.getSystemInfoSync().screenWidth
+    this.windowHeight = uni.getSystemInfoSync().screenHeight
+
+    this.platform = uni.getSystemInfoSync().platform
+    const model = uni.getSystemInfoSync().model
+    if (
+      this.platform == 'ios' &&
+      (model !== 'iPhone6' ||
+        model !== 'iPhone6s' ||
+        model !== 'iPhone7' ||
+        model !== 'iPhone8')
+    ) {
+      this.tabberHeight = 50 + 32
+      this.commentHeight = 1.4
+    } else {
+      this.tabberHeight = 50
+      this.commentHeight = 1.4
+    }
+
+    await this.loadData(option)
+    // this.openComment()
+  },
+  methods: {
+    // 获取播放器对象的工厂方法
+    getVideoContext(index) {
+      if (this.videoContextList[index]) {
+        return this.videoContextList[index]
+      } else {
+        const videoContext = uni.createVideoContext(
+          this.dataList[index]._id,
+          this
+        )
+        this.videoContextList[index] = videoContext
+        return videoContext
+      }
+    },
+    // 播放当前视频，并预先加载一下一个视频
+    playVideo(index) {
+      if (index >= 0) {
+        this.dataList[index].state = 'play'
+        console.log('play: ', index)
+        setTimeout(() => {
+          const videoContext = this.getVideoContext(index)
+          if (this.platform == 'ios') {
+            videoContext.play()
+          } else {
+            videoContext.pause()
+            videoContext.play()
+          }
+        }, 100)
+        if (index + 2 < this.dataList.length) {
+          setTimeout(() => {
+            const nextVideoContext = this.getVideoContext(index + 1)
+            // 因为默认是静音的，所以play后用户感受不到，但又可以预先加载内容
+            nextVideoContext.play()
+            clearTimeout(this.preloadTimer)
+            this.preloadTimer = setTimeout(() => {
+              nextVideoContext.seek(0)
+              nextVideoContext.pause()
+            }, 1500)
+          }, 500)
+        }
+      }
+    },
+    // 停止播放视频
+    stopVideo(index) {
+      if (index >= 0) {
+        this.dataList[index].state = 'stop'
+        clearTimeout(this.pauseTimer)
+        this.pauseTimer = setTimeout(() => {
+          const videoContext = this.getVideoContext(index)
+          videoContext.pause()
+          videoContext.seek(0)
+        }, 500)
+      }
+    },
+    // 加载首页数据
+    async loadData(option) {
+      const data = await request.post('/public/short')
+      this.dataList = data
+      // 检查是否跳过第几集
+      const seek = option.index ? Number(option.index) : 0
+      if (0 < seek && seek < this.dataList.length) {
+        this.$nextTick(() => {
+          setTimeout(() => {
+            const dom = uni.requireNativePlugin('dom')
+            const el = this.$refs[seek][0]
+            dom.scrollToElement(el, {
+              offset: 0,
+              animated: false
+            })
+            this.currentPlayer = seek
+          }, 100)
+        })
+      } else {
+        // 默认播放第一个视频
+        this.currentPlayer = 0
+      }
+    },
+    listLoadMore() {},
+
+    // 上滑，显示下一个视频
+    listScroll(event) {
+      this.isSwiperDragging = event.isDragging
+      if (!event.isDragging) {
+        var i = Math.round(
+          Math.abs(event.contentOffset.y) /
+            (this.windowHeight - this.tabberHeight + 1)
+        )
+        if (i !== this.currentPlayer && this.currentPlayer >= 0) {
+          clearTimeout(this.timers)
+          this.timers = setTimeout(() => {
+            this.currentPlayer = i
+            console.log(
+              '正在播放 --> 第' + (this.currentPlayer + 1) + '个视频～'
+            )
+          }, 80)
+        }
+      }
+    },
+
+    //点击播放&&暂停
+    playerClick(state, event) {
+      console.log('playerClick....')
+      if (this.currentPlayer < 0) {
+        return
+      }
+      // 处理双击事件
+      this.numberOfClicks++
+      if (this.dblClickTimer) {
+        clearTimeout(this.dblClickTimer)
+      }
+      this.dblClickTimer = setTimeout(() => {
+        if (this.numberOfClicks == 1) {
+          // 如果是单击
+          if (state == 'play') {
+            this.dataList[this.currentPlayer].state = 'pause'
+            this.getVideoContext(this.currentPlayer).pause()
+          } else {
+            this.dataList[this.currentPlayer].state = 'play'
+            this.getVideoContext(this.currentPlayer).play()
+          }
+        } else if (this.numberOfClicks > 1) {
+          // 如果是双击
+          this.doubleLike(event)
+        }
+        this.numberOfClicks = 0
+      }, 400)
+    },
+    doubleLike(event) {
+      if (!this.dataList[this.currentPlayer].isLike) {
+        this.dataList[this.currentPlayer].like += 1
+        this.dataList[this.currentPlayer].isLike = true
+      }
+      this.likePosition = event.touches[0]
+      this.isLikePlay = true
+    },
+
+    progressBarSeek(seek) {
+      console.log('seek: ', seek)
+      this.getVideoContext(this.currentPlayer).seek(seek)
+      this.getVideoContext(this.currentPlayer).play()
+      this.dataList[this.currentPlayer].state = 'play'
+    },
+
+    // 更新进度条表
+    videoTimeUpdate(event, index) {
+      //计算滑块当前位置，计算当前百分小数
+      if (index == this.currentPlayer) {
+        this.totalTime = event.detail.duration
+        this.currentTime = event.detail.currentTime
+
+        //自动切换视频
+        if (this.isAutoplay) {
+          //true,代表自动播放
+          if (event.detail.currentTime + 1 >= event.detail.duration) {
+            const dom = uni.requireNativePlugin('dom')
+            let doms = this.currentPlayer + 1
+            setTimeout(() => {
+              let el = this.$refs[doms][0]
+              dom.scrollToElement(el, {
+                offset: 0,
+                animated: true
+              })
+            }, 500)
+          }
+        }
+      }
+    },
+
+    stop() {
+      // console.log('stop')
+    },
+
+    onPullingDown() {
+      // console.log('正在下拉刷新，此时手还在触摸没有松开')
+      this.refreshing = true
+    },
+    onRefresh() {
+      // console.log('下拉刷新完毕，此时手松开了')
+      setTimeout(() => {
+        this.refreshing = false
+      }, 1000)
+    },
+
+    openComment(index) {
+      // uni.setStorageSync('videoID', this.dataList[index]._id)
+      this.$refs.pinglun.open('bottom')
+    },
+    clickShare() {
+      uni.showToast({
+        title: '分享',
+        icon: 'none'
+      })
+    },
+
+    clickLike(like) {
+      this.dataList[this.currentPlayer].isLike =
+        !this.dataList[this.currentPlayer].isLike
+      const video = this.dataList[this.currentPlayer]
+      like ? (video.like ? video.like-- : video.like == 0) : video.like++
+    },
+
+    clickAvatar(i) {},
+
+    closeCommentHandle() {},
+    closeComment() {
+      // 点击评论里面的叉叉，就会关闭评论
+      this.$refs.pinglun.close()
+    },
+
+    // 视频播放的一个回调通知，
+    videoPlay(index) {
+      setTimeout(() => {
+        this.dataList[index].playIng = true
+      }, 200)
+    },
+
+    clickCover() {
+      uni.showToast({
+        title: '处理声音',
+        icon: 'none'
+      })
+    }
+  }
+}
+</script>
+<style scoped>
+.container {
+  background-color: #000000;
+}
+.videoHover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  flex: 1;
+  background-color: rgba(0, 0, 0, 0.1);
+  justify-content: center;
+  align-items: center;
+}
+.playState {
+  width: 160rpx;
+  height: 160rpx;
+  opacity: 0.2;
+}
+.userInfo {
+  position: absolute;
+  bottom: 80px;
+  right: 10px;
+  flex-direction: column;
+}
+</style>

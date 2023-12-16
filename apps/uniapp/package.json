@@ -1,0 +1,9 @@
+{
+  "name": "开源短视频",
+  "version": "1.0.0",
+  "dependencies": {
+    "vue-i18n": "^8.28.2",
+    "xgplayer": "^2.32.2",
+    "xgplayer-hls": "^2.5.2"
+  }
+}

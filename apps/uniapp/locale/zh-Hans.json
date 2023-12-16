@@ -1,0 +1,26 @@
+{
+  "app.name": "ShortTV",
+  "discover": "首页",
+  "shorts": "发现",
+  "favorite": "收藏",
+  "favorite1": "喜欢",
+  "favorite2": "最近看过",
+  "profile": "我的",
+  "setting": "设置",
+  "language": "选择语言",
+  "feedback": "意见反馈",
+  "rewards": "活动奖励",
+  "signin": "登陆",
+  "logout": "退出",
+  "index1": "最热门",
+  "index2": "新剧",
+  "index3": "虐恋",
+  "index4": "浪漫爱情",
+  "index5": "最新发布",
+  "index6": "Most Trending",
+
+  "languagesetting": "Language Setting",
+  "english": "English",
+  "chinese": "简体中文",
+  "last": ""
+}
