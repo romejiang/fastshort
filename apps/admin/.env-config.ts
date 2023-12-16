@@ -10,7 +10,7 @@ const serviceEnv: ServiceEnv = {
     url: 'http://localhost:8080'
   },
   prod: {
-    url: 'http://api.ai2app.xyz/api/admin'
+    url: 'https://api.fastshort.top/api/admin'
   }
 };
 
