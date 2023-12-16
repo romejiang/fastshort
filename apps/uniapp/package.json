@@ -1,5 +1,5 @@
 {
-  "name": "开源短视频",
+  "name": "@fastshort/uniapp",
   "version": "1.0.0",
   "dependencies": {
     "vue-i18n": "^8.28.2",
