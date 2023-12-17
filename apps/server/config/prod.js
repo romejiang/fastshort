@@ -9,7 +9,8 @@ const config = {
     saltkey: 'shorttv202312'
   },
   mongodb: {
-    host: 'mongodb://shorttv:L5RM2Sr42YECNMyP@localhost:27017/shorttv',
+    // host: 'mongodb://shorttv:L5RM2Sr42YECNMyP@localhost:27017/shorttv',
+    host: 'mongodb://mongodb',
     db: 'shorttv'
   },
   s3: {

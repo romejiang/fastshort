@@ -1,6 +1,7 @@
 /** 请求服务的环境配置 */
 type ServiceEnv = Record<ServiceEnvType, ServiceEnvConfig>;
 
+const docker_url = "DEFINE_DOCKER_URL"
 /** 不同请求服务的环境配置 */
 const serviceEnv: ServiceEnv = {
   dev: {
@@ -10,7 +11,7 @@ const serviceEnv: ServiceEnv = {
     url: 'http://localhost:8080'
   },
   prod: {
-    url: 'https://api.fastshort.top/api/admin'
+    url: docker_url ? docker_url + '/api/admin' : 'https://api.fastshort.top/api/admin'
   }
 };
 

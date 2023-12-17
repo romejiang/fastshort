@@ -57,7 +57,7 @@ app.listen(config.app.port, () => {
 })
 //如果是开发环境，不需要监听进程的关闭事件
 if (process.env.PLATFORM != 'DEV') {
-  process.send('ready')
+  process.send && process.send('ready')
   process.on('SIGINT', async function () {
     try {
       console.log('KOA 停止服务....')

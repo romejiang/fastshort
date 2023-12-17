@@ -1,0 +1,11 @@
+node_modules
+screenshots
+template
+
+info.md
+server.sh
+readme.md
+
+Dockerfile
+pnpm-lock.yaml
+package-lock.json

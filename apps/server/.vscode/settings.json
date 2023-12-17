@@ -24,7 +24,6 @@
     "package/": true,
     ".vscode": true,
     "middleware": true,
-    "pm2": true,
     "crontab": true,
     "lib": true,
     "template": true,
@@ -44,7 +43,6 @@
   "hide-files.files": [
     ".vscode",
     "middleware",
-    "pm2",
     "crontab",
     "lib",
     "template",
