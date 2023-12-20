@@ -10,3 +10,7 @@ deploy.sh
 server.sh
 
 info.md
+
+apps/server/config/dev.js
+apps/server/config/prod.js
+apps/server/config/test.js
