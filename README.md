@@ -2,7 +2,7 @@
 
 开源的短剧 APP 解决方案，支持 IOS , Android , 微信小程序 , H5 , 抖音小程序。
 
-> 计划支持Windows、MacOS、Linux客户端。
+> 计划未来支持Windows、MacOS、Linux等客户端。
 
 * 支持类似抖音的随机播放
 * 支持谷歌、Facebook、Apple、微信第三方登录
@@ -16,15 +16,19 @@
 
 ## 线上演示环境
 
-H5 演示地址，账号可以自行注册
+#### H5 演示地址，账号可以自行注册
+
 https://h5.fastshort.top
 
-andorid 演示 apk 下载
+#### Andorid 演示
+[APK 下载](https://github.com/romejiang/fastshort/releases/download/v0.1.0-alpha/__UNI__961D650__20231220070657.apk)
 
-管理后台地址
+#### 管理后台地址
+
 https://admin.fastshort.top
 
-管理后台账号
+#### 管理后台账号
+
 admin/1qazxsw2
 
 
@@ -42,8 +46,8 @@ http://localhost:3001
 ```
 
 
-## 具体功能特性官方主页
+## 具体更详细的功能特性看官方主页
 
-https://fastshort.top
+[官方网站 https://fastshort.top](https://fastshort.top)
 
 ## 文档和功能逐渐完善中...
