@@ -1,6 +1,6 @@
 import store from '@/store/index.js'
 
-let url = 'http://192.168.1.4:3000/api'
+let url = 'http://192.168.1.24:3000/api'
 // let url = 'http://127.0.0.1:3000/api'
 if (process.env.NODE_ENV == 'production') {
   url = 'https://api.fastshort.top/api'

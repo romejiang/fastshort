@@ -140,9 +140,6 @@
       ></episode>
     </uni-popup>
     <!-- #endif -->
-    <!-- #ifndef APP -->
-    <webPanel />
-    <!-- #endif -->
   </view>
 </template>
 <script>
@@ -165,7 +162,6 @@ export default {
     topbar,
     episode,
     progressbar,
-    webPanel,
     likeEffect,
     avatar,
     like,

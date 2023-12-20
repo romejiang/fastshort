@@ -73,15 +73,15 @@
                 },
                 "statics" : {
                     "google" : {
-                        "config_ios" : "/Users/stephen/Projects/Xian/tiktokapp/ShortTV/certificates/statistic/apple.plist",
-                        "config_android" : "/Users/stephen/Projects/Xian/tiktokapp/ShortTV/certificates/statistic/android.json"
+                        "config_ios" : "/Users/stephen/Projects/Xian/tiktokapp/fastshort/apps/uniapp/certificates/statistic2/AppleGoogleService-Info.plist",
+                        "config_android" : "/Users/stephen/Projects/Xian/tiktokapp/fastshort/apps/uniapp/certificates/statistic2/android-google-services.json"
                     }
                 },
                 "payment" : {
                     "paypal" : {
                         "__platform__" : [ "ios", "android" ],
-                        "returnURL_ios" : "xyz.ai2app.shorttv://paypalpay",
-                        "returnURL_android" : "xyz.ai2app.shorttv://paypalpay"
+                        "returnURL_ios" : "uni.uni961d650://paypalpay",
+                        "returnURL_android" : "uni.uni961d650://paypalpay"
                     }
                 }
             },
