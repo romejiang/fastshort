@@ -17,3 +17,9 @@ services:
     ports:
       - 3001:80
   
+  webapp:
+    image: fastshort/webapp:latest
+    restart: always
+    ports:
+      - 3002:80
+  

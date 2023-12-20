@@ -54,7 +54,7 @@ export default {
     }
   },
   async onLoad(option) {
-    const data = await request.get('/public')
+    const data = await request.post('/public/home')
 
     this.recommend = data.recommend
     this.categorys = data.categorys

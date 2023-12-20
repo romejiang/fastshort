@@ -40,6 +40,12 @@ const uploadS3 = async (filepath, filename) => {
   return url
 }
 export default {
+  async index(ctx) {
+    success(ctx, {
+      name: process.env.npm_package_name,
+      version: process.env.npm_package_version
+    })
+  },
   // 上传文件，头像，视频，等等
   async upload(ctx) {
     try {
@@ -189,7 +195,7 @@ export default {
     }
   },
   // 首页推荐内容
-  async index(ctx) {
+  async home(ctx) {
     const recommend = await mongo
       .col('series')
       .find()

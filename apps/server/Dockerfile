@@ -7,6 +7,8 @@ RUN npm install --global "pnpm"
 COPY . .
 RUN pnpm install
 
-ENV PLATFORM=PROD
+ENV PLATFORM=PROD \
+  IN_DOCKER=true
+
 EXPOSE 3000
 CMD node /app/app.js
